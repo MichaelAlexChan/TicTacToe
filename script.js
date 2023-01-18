@@ -60,7 +60,8 @@ const gameController = ((board) => {
     if (board.addMove(row, column, symbol)) {
     setCurrentPlayer();
     turnsTaken += 1;
-    getTurns();
+    getTurns
+    ();
     if (turnsTaken >= 4) {
       console.log(determineWinner());
     }
