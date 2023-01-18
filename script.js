@@ -4,21 +4,18 @@ const gameBoard = (() => {
   /* I realized that I was supposed to make board a private variable and provide access
   functions only after I finished the assignment. */
   let board = [
-    ['x', 'x', 'x'],
+    [0, 0, 0],
     [0, 0, 0],
     [0, 0, 0],
   ];
 
   // Determines if a place on the board is already occupied or not
   const addMove = (row, column, symbol) => {
-    if (column > 2) {
-      return;
+    if (column > 2 || board[row][column] !== 0) {
+      return false;
     }
-    if (board[row][column] === 0) {
-      board[row][column] = symbol;
-    } else {
-      console.log('spot taken lol');
-    }
+    board[row][column] = symbol;
+    return true;
   };
 
   const resetBoard = () => {
@@ -38,7 +35,17 @@ const gameBoard = (() => {
 // Module pattern and IIFE practice - Game Controller
 const gameController = ((board) => {
   let turnsTaken = 0;
+  let currentPlayer = 'player1';
   console.log(`Initial turn counter: ${turnsTaken}`);
+
+  const setCurrentPlayer = () => {
+    if (currentPlayer === 'player1') {
+      currentPlayer = 'player2';
+    }
+  }
+  const getCurrentPlayer = () => {
+    return currentPlayer;
+  }
 
   const resetTurns = () => {
     turnsTaken = 0;
@@ -50,9 +57,14 @@ const gameController = ((board) => {
   };
 
   const playerMove = (symbol, row, column) => {
-    board.addMove(row, column, symbol);
+    if (board.addMove(row, column, symbol)) {
+    setCurrentPlayer();
     turnsTaken += 1;
     getTurns();
+    if (turnsTaken >= 4) {
+      console.log(determineWinner());
+    }
+  }
   };
 
   const determineWinner = () => {
@@ -79,6 +91,7 @@ const gameController = ((board) => {
         break;
       }
     }
+    console.log('Win status (row) ' + winStatus);
 
     if (winStatus === 'no winner') {
       // Loop through each column
@@ -93,10 +106,12 @@ const gameController = ((board) => {
             winStatus = currentBoard[j][i];
           }
         }
-        if (winStatus === 'no winner') {
+        if (winStatus !== 'no winner') {
           break;
         }
       }
+      console.log('Win status (column) ' + winStatus);
+
 
       if (winStatus === 'no winner') {
         // Loop through the diagonal (top-left to bottom-right)
@@ -115,6 +130,8 @@ const gameController = ((board) => {
           }
         }
       }
+      console.log('Win status (topleft bottomright) ' + winStatus);
+
       // Compare the bottom-left to top-right
       if (winStatus === 'no winner') {
         if (currentBoard[0][2] !== currentBoard[2][0]) {
@@ -125,11 +142,13 @@ const gameController = ((board) => {
         }
       }
     }
+
     return winStatus;
   };
 
   return {
     resetTurns,
+    getCurrentPlayer,
     playerMove,
     determineWinner,
   };
@@ -150,12 +169,30 @@ const setUpGame = ((board) => {
   for (let i = 0; i < board.board.length; i += 1) {
     const tileRow = document.createElement('div');
     tileRow.classList.add('tileRow');
+    tileRow.setAttribute('data-row', i);
     for (let j = 0; j < board.board[i].length; j += 1) {
       const tile = document.createElement('div');
       tile.classList.add('tile');
+      tile.setAttribute('data-column', j);
       tile.innerHTML = board.board[i][j];
       tileRow.appendChild(tile);
     }
     container.appendChild(tileRow);
+    console.log(tileRow);
   }
 })(gameBoard);
+
+
+
+
+const gameContainer = document.getElementById('container');
+gameContainer.addEventListener('click', (event) => {
+  console.log(event.target);
+  console.log(event.target.parentNode)
+  const row = event.target.parentNode.getAttribute('data-row');
+  const column = event.target.getAttribute('data-column');
+  console.log(`row: ${row}, column ${column}`);
+  gameController.playerMove('x', row, column)
+  console.log(gameBoard.board)
+  event.target.innerHTML = gameBoard.board[row][column]
+})
