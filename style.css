@@ -1,4 +1,27 @@
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#container {
+  font-size: 18px;
+}
+
+.tile {
+  border: 1px solid black;
+  width: 5em;
+  height: 5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tileRow {
   display: flex;
-  gap: 10px;
 }
