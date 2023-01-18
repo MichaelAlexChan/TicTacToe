@@ -4,7 +4,7 @@ const gameBoard = (() => {
   /* I realized that I was supposed to make board a private variable and provide access
   functions only after I finished the assignment. */
   let board = [
-    [0, 0, 0],
+    ['x', 'x', 'x'],
     [0, 0, 0],
     [0, 0, 0],
   ];
@@ -145,11 +145,17 @@ const playerFactory = (name, symbol) => {
   };
 };
 
-const player1 = playerFactory('player1', 'x');
-const player2 = playerFactory('player2', 'o');
-gameController.playerMove(player1.getSymbol(), 2, 1);
-gameController.playerMove(player2.getSymbol(), 2, 1);
-gameController.playerMove(player1.getSymbol(), 2, 2);
-
-const winner = gameController.determineWinner();
-console.log(gameBoard.board);
+const setUpGame = ((board) => {
+  const container = document.getElementById('container');
+  for (let i = 0; i < board.board.length; i += 1) {
+    const tileRow = document.createElement('div');
+    tileRow.classList.add('tileRow');
+    for (let j = 0; j < board.board[i].length; j += 1) {
+      const tile = document.createElement('div');
+      tile.classList.add('tile');
+      tile.innerHTML = board.board[i][j];
+      tileRow.appendChild(tile);
+    }
+    container.appendChild(tileRow);
+  }
+})(gameBoard);
