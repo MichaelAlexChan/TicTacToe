@@ -9,7 +9,14 @@ body {
   align-items: center;
 }
 
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 3vh;
+}
+
 #container {
+  margin-top: 5vh;
   font-size: 18px;
 }
 
