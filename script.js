@@ -35,22 +35,54 @@ const gameBoard = (() => {
 // Module pattern and IIFE practice - Game Controller
 const gameController = ((board) => {
   let turnsTaken = 0;
-  let currentPlayer;
   let player1;
   let player2;
-  console.log(`Initial turn counter: ${turnsTaken}`);
+  let currentPlayer;
+  let currentPlayerSymbol;
 
   const startBoard = (p1, p2) => {
-    player1 = p1.getName();
-    player2 = p2.getName();
-    currentPlayer = p1.getSymbol();
+    player1 = p1;
+    player2 = p2;
+    currentPlayer = p1.getName();
+    console.log(currentPlayer);
+    currentPlayerSymbol = p1.getSymbol();
+    displayTurn();
+    setUpGame();
+  };
+
+  const endGame = (playerSymbol) => {
+    const winDisplay = document.getElementById('winner');
+    if (playerSymbol === 'no winner') {
+      winDisplay.innerHTML = 'TIE';
+    } else {
+      winDisplay.innerHTML = `The winner is: ${currentPlayer}! (${currentPlayerSymbol})`;
+    }
+    const restart = document.createElement('button');
+    restart.innerHTML = 'restart';
+    restart.addEventListener('click', resetGameBoard);
+    document.getElementById('score').appendChild(restart);
+  };
+
+  const displayTurn = () => {
+    const playerDisplay = document.getElementById('playerDisplay');
+    playerDisplay.innerHTML = `${currentPlayer}'s (${currentPlayerSymbol}) turn`;
+    const turnDisplay = document.getElementById('turnDisplay');
+    turnDisplay.innerHTML = `Turns taken: ${turnsTaken}`;
   };
 
   const changePlayer = () => {
-    if (currentPlayer === 'x') {
-      currentPlayer = 'o';
+    if (currentPlayer === player1.getName()) {
+      currentPlayer = player2.getName();
     } else {
-      currentPlayer = 'x';
+      currentPlayer = player1.getName();
+    }
+  };
+
+  const changePlayerSymbol = () => {
+    if (currentPlayerSymbol === 'x') {
+      currentPlayerSymbol = 'o';
+    } else {
+      currentPlayerSymbol = 'x';
     }
   };
   const getCurrentPlayer = () => currentPlayer;
@@ -59,19 +91,42 @@ const gameController = ((board) => {
     turnsTaken = 0;
   };
 
-  const getTurns = () => {
-    console.log(`Turns taken: ${turnsTaken}`);
-    return turnsTaken;
+  const setUpGame = () => {
+    const container = document.getElementById('container');
+    for (let i = 0; i < board.board.length; i += 1) {
+      const tileRow = document.createElement('div');
+      tileRow.classList.add('tileRow');
+      tileRow.setAttribute('data-row', i);
+      for (let j = 0; j < board.board[i].length; j += 1) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        tile.setAttribute('data-column', j);
+        tile.innerHTML = board.board[i][j];
+        tileRow.appendChild(tile);
+      }
+      container.appendChild(tileRow);
+    }
+  };
+
+  const resetGameBoard = () => {
+    resetTurns();
+    board.resetBoard();
+    setUpGame();
   };
 
   const playerMove = (row, column) => {
-    if (board.addMove(row, column, currentPlayer)) {
+    if (board.addMove(row, column, currentPlayerSymbol)) {
       turnsTaken += 1;
-      getTurns();
-      changePlayer();
-      if (turnsTaken >= 4) {
-        console.log(determineWinner());
+      if (turnsTaken >= 4 && turnsTaken < 9 && determineWinner() !== 0) {
+        if (determineWinner() !== 'no winner') {
+          endGame(determineWinner());
+        } else {
+          endGame('no winner');
+        }
       }
+      changePlayer();
+      changePlayerSymbol();
+      displayTurn();
     }
   };
 
@@ -173,24 +228,6 @@ const playerFactory = (name, symbol) => {
   };
 };
 
-const setUpGame = ((board) => {
-  const container = document.getElementById('container');
-  for (let i = 0; i < board.board.length; i += 1) {
-    const tileRow = document.createElement('div');
-    tileRow.classList.add('tileRow');
-    tileRow.setAttribute('data-row', i);
-    for (let j = 0; j < board.board[i].length; j += 1) {
-      const tile = document.createElement('div');
-      tile.classList.add('tile');
-      tile.setAttribute('data-column', j);
-      tile.innerHTML = board.board[i][j];
-      tileRow.appendChild(tile);
-    }
-    container.appendChild(tileRow);
-    console.log(tileRow);
-  }
-});
-
 const player1selection = document.getElementById('p1symbol');
 const player2selection = document.getElementById('p2symbol');
 player1selection.addEventListener('change', () => {
@@ -213,14 +250,14 @@ player2selection.addEventListener('change', () => {
 
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
-  setUpGame(gameBoard);
   const p1 = playerFactory('bob', player1selection.value);
   const p2 = playerFactory('billy', player2selection.value);
   gameController.startBoard(p1, p2);
-  console.log(gameController.getCurrentPlayer());
+  document.getElementById('playerSubmission').style.visibility = 'hidden';
 });
 
 const gameContainer = document.getElementById('container');
+
 gameContainer.addEventListener('click', (event) => {
   console.log(event.target);
   console.log(event.target.parentNode);

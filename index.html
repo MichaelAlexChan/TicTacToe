@@ -12,7 +12,7 @@
             <form id="playerForm">
                 <div id="player1">
                     <label for="name">Player #1 Name</label>
-                    <input type="text" id="name" name="name">
+                    <input type="text" id="name" name="name" value="player1">
                     <label for="symbol">Player #1 Symbol</label>
                     <select name="symbol" id="p1symbol">
                         <option value="x">x</option>
@@ -21,7 +21,7 @@
                 </div>
                 <div id="player2">
                     <label for="name">Player #2 Name</label>
-                    <input type="text" id="name" name="name">
+                    <input type="text" id="name" name="name" value="player2">
                     <label for="symbol">Player #2 Symbol</label>
                     <select name="symbol" id="p2symbol">
                         <option value="o">o</option>
@@ -33,6 +33,11 @@
         </div>
         <div id="container">
 
+        </div>
+        <div id="score">
+            <div id="playerDisplay"></div>
+            <div id="turnDisplay"></div>
+            <div id="winner"></div>
         </div>
     </body>
 </html>
