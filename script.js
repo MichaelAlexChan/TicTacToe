@@ -35,17 +35,25 @@ const gameBoard = (() => {
 // Module pattern and IIFE practice - Game Controller
 const gameController = ((board) => {
   let turnsTaken = 0;
-  let currentPlayer = 'player1';
+  let currentPlayer;
+  let player1;
+  let player2;
   console.log(`Initial turn counter: ${turnsTaken}`);
 
-  const setCurrentPlayer = () => {
-    if (currentPlayer === 'player1') {
-      currentPlayer = 'player2';
+  const startBoard = (p1, p2) => {
+    player1 = p1.getName();
+    player2 = p2.getName();
+    currentPlayer = p1.getSymbol();
+  };
+
+  const changePlayer = () => {
+    if (currentPlayer === 'x') {
+      currentPlayer = 'o';
+    } else {
+      currentPlayer = 'x';
     }
-  }
-  const getCurrentPlayer = () => {
-    return currentPlayer;
-  }
+  };
+  const getCurrentPlayer = () => currentPlayer;
 
   const resetTurns = () => {
     turnsTaken = 0;
@@ -56,16 +64,15 @@ const gameController = ((board) => {
     return turnsTaken;
   };
 
-  const playerMove = (symbol, row, column) => {
-    if (board.addMove(row, column, symbol)) {
-    setCurrentPlayer();
-    turnsTaken += 1;
-    getTurns
-    ();
-    if (turnsTaken >= 4) {
-      console.log(determineWinner());
+  const playerMove = (row, column) => {
+    if (board.addMove(row, column, currentPlayer)) {
+      turnsTaken += 1;
+      getTurns();
+      changePlayer();
+      if (turnsTaken >= 4) {
+        console.log(determineWinner());
+      }
     }
-  }
   };
 
   const determineWinner = () => {
@@ -92,7 +99,7 @@ const gameController = ((board) => {
         break;
       }
     }
-    console.log('Win status (row) ' + winStatus);
+    console.log(`Win status (row) ${winStatus}`);
 
     if (winStatus === 'no winner') {
       // Loop through each column
@@ -111,8 +118,7 @@ const gameController = ((board) => {
           break;
         }
       }
-      console.log('Win status (column) ' + winStatus);
-
+      console.log(`Win status (column) ${winStatus}`);
 
       if (winStatus === 'no winner') {
         // Loop through the diagonal (top-left to bottom-right)
@@ -131,11 +137,12 @@ const gameController = ((board) => {
           }
         }
       }
-      console.log('Win status (topleft bottomright) ' + winStatus);
+      console.log(`Win status (topleft bottomright) ${winStatus}`);
 
       // Compare the bottom-left to top-right
       if (winStatus === 'no winner') {
-        if (currentBoard[0][2] !== currentBoard[2][0]) {
+        if (currentBoard[0][2] !== currentBoard[1][1] || currentBoard[0][2]
+            !== currentBoard[2][0]) {
           winStatus = 'no winner';
         } else {
         // eslint-disable-next-line prefer-destructuring
@@ -148,6 +155,7 @@ const gameController = ((board) => {
   };
 
   return {
+    startBoard,
     resetTurns,
     getCurrentPlayer,
     playerMove,
@@ -181,19 +189,45 @@ const setUpGame = ((board) => {
     container.appendChild(tileRow);
     console.log(tileRow);
   }
-})(gameBoard);
+});
 
+const player1selection = document.getElementById('p1symbol');
+const player2selection = document.getElementById('p2symbol');
+player1selection.addEventListener('change', () => {
+  if (player1selection.value === 'x') {
+    player2selection.value = 'o';
+  } else {
+    player2selection.value = 'x';
+  }
+});
 
+player2selection.addEventListener('change', () => {
+  if (player2selection.value === 'x') {
+    player1selection.value = 'o';
+  } else {
+    player1selection.value = 'x';
+  }
+  console.log(player1selection.value);
+  console.log(player2selection.value);
+});
 
+const startButton = document.getElementById('startButton');
+startButton.addEventListener('click', () => {
+  setUpGame(gameBoard);
+  const p1 = playerFactory('bob', player1selection.value);
+  const p2 = playerFactory('billy', player2selection.value);
+  gameController.startBoard(p1, p2);
+  console.log(gameController.getCurrentPlayer());
+});
 
 const gameContainer = document.getElementById('container');
 gameContainer.addEventListener('click', (event) => {
   console.log(event.target);
-  console.log(event.target.parentNode)
+  console.log(event.target.parentNode);
   const row = event.target.parentNode.getAttribute('data-row');
   const column = event.target.getAttribute('data-column');
   console.log(`row: ${row}, column ${column}`);
-  gameController.playerMove('x', row, column)
-  console.log(gameBoard.board)
-  event.target.innerHTML = gameBoard.board[row][column]
-})
+  gameController.playerMove(row, column);
+  console.log(gameBoard.board);
+  event.target.innerHTML = gameBoard.board[row][column];
+});
